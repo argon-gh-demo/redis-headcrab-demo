@@ -33,7 +33,10 @@ jobs:
           args: trivy -d fs --scanners config,vuln,secret . --sast
           # To customize which severities to scan for, add the following flag: --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           # To enable SAST scanning, add: --sast
-          # To enable npm/dotnet non-lock file scanning, add: --package-json / --dotnet-proj  
+          # To enable npm/dotnet non-lock file scanning, add: --package-json / --dotnet-proj
+        env: 
+          AQUA_URL: ${{env.AQUA_URL}}
+          CSPM_URL: ${{env.AQUA_URL}}
       - name: Build image locally
         run: |
           docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
