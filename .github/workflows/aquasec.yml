@@ -2,13 +2,13 @@ name: build
 on:
   push:
     branches:
-      - main
+      - deploy-staging
 
 jobs:
   all-in-one:
     name: Aqua scanner
     runs-on: ubuntu-latest
-    environment: SAEMEA
+    environment: staging
     env:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -17,8 +17,6 @@ jobs:
       AQUA_KEY: ${{ secrets.AQUA_KEY }}
       AQUA_SECRET: ${{ secrets.AQUA_SECRET }}
       TRIVY_RUN_AS_PLUGIN: 'aqua'
-      EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
-      EKS_ARN: ${{ secrets.EKS_ARN }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       
     permissions:
@@ -71,11 +69,6 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-      - name: Install kubectl and deploy to EKS
-        run: |
-          sudo apt-get update
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
           kubectl config use-context $EKS_ARN
           kubectl delete pod -l $ECR_REPOSITORY
